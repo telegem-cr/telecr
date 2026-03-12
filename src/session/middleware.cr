@@ -10,7 +10,7 @@ module Telecr
         return next_middleware.call(ctx) unless user_id
 
         # Load session
-        ctx.session = @store.get(user_id) || {} of String => JSON::any
+        ctx.session = @store.get(user_id) || {} of String => JSON::Any
         
         begin
           # Execute the rest of the chain

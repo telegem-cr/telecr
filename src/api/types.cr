@@ -1,6 +1,6 @@
 # types.cr - Telegram API type system for Crystal
 
-module Telegem
+module Telecr
   module Types
     # Base class for all Telegram API objects
     abstract class BaseType
@@ -14,9 +14,6 @@ module Telegem
       def to_h : Hash(String, JSON::Any)
         @raw
       end
-
-      # Alias for compatibility
-     
 
       # Inspect for debugging
       def inspect(io : IO) : Nil
@@ -64,8 +61,6 @@ module Telegem
       def id : Int64?
         @raw["id"]?.try(&.as_i64)
       end
-      
-      alias to_hash to_h
 
       def is_bot : Bool?
         @raw["is_bot"]?.try(&.as_bool)
@@ -116,7 +111,7 @@ module Telegem
         @raw["id"]?.try(&.as_i64)
       end
 
-      def type : String?
+      def chat_type : String?
         @raw["type"]?.try(&.as_s)
       end
 
@@ -137,19 +132,19 @@ module Telegem
       end
 
       def private? : Bool
-        type == "private"
+        chat_type == "private"
       end
 
       def group? : Bool
-        type == "group"
+        chat_type == "group"
       end
 
       def supergroup? : Bool
-        type == "supergroup"
+        chat_type == "supergroup"
       end
 
       def channel? : Bool
-        type == "channel"
+        chat_type == "channel"
       end
 
       def to_s : String
@@ -159,7 +154,7 @@ module Telegem
 
     # Message entity object
     class MessageEntity < BaseType
-      def type : String?
+      def entity_type : String?
         @raw["type"]?.try(&.as_s)
       end
 
@@ -270,7 +265,7 @@ module Telegem
 
         return nil if cmd.size <= 1
 
-        cmd = cmd[1..-1]  # Remove leading /
+        cmd = cmd[1..-1]
         cmd.split('@').first.strip
       end
 
@@ -288,7 +283,6 @@ module Telegem
         args_start = offset + length
         return nil if args_start >= text.size
 
-        # Find next entity that starts after command
         next_entity = entities
           .select { |e| e["offset"].as_i >= args_start }
           .min_by? { |e| e["offset"].as_i }
@@ -486,7 +480,7 @@ module Telegem
         end
       end
 
-      def type : Symbol
+      def update_type : Symbol
         return :message if message?
         return :edited_message if edited_message?
         return :channel_post if channel_post?
@@ -522,7 +516,6 @@ module Telegem
         end
       end
 
-      # Type check helpers
       def message? : Bool
         !!@raw["message"]?
       end
@@ -580,7 +573,6 @@ module Telegem
       end
     end
 
-    # Placeholder classes (you can expand these as needed)
     class InlineQuery < BaseType
       def from : User?
         if data = @raw["from"]?
@@ -615,6 +607,7 @@ module Telegem
 
     class Poll < BaseType; end
     class PollAnswer < BaseType; end
+    
     class ChatMemberUpdated < BaseType
       def from : User?
         if data = @raw["from"]?

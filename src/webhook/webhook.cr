@@ -332,7 +332,7 @@ def get_webhook_info
     @logger.info(" Webhook info retrieved")
     result
   rescue e
-    @logger.error("❌ Failed to get webhook info: #{e.message}"
+    @logger.error("❌ Failed to get webhook info: #{e.message}")
     JSON.parse(%({"ok": false, "error": "#{e.message}"}))
   end
 end
