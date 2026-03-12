@@ -1,6 +1,6 @@
 module Telecr
   module Session
-    class Middleware
+    class Middleware < Core::Middleware
       def initialize(store = nil)
         @store = store || MemoryStore.new
       end 
@@ -31,7 +31,3 @@ module Telecr
     end
   end
 end
-
-      
-
-  
