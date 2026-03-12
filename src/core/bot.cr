@@ -11,6 +11,8 @@ module Telecr
       getter client : Api::Client      # Handles Telegram API calls
       getter composer : Composer       # Manages middleware chain
       getter running : Bool             # Bot running state
+      getter webhook_server : Webhook::Server?
+      getter webhook_path : String?
       
       # Initialize a new bot with your Telegram token
       def initialize(token : String)
@@ -19,10 +21,12 @@ module Telecr
         @running : Bool = false
         # Store handlers for different update types
         @handlers = HandlerCollection.new
-
+        @middleware = [] of {Middleware, Array(JSON::Any), Proc(Nil)?} 
         @offset = 0                       # For long polling
         @logger = Logger.new(STDOUT)      # Logging
         @error_handler = nil               # Custom error handler
+        @webhook_server = nil
+        @webhook_path = nil
       end 
       
       # Start bot in polling mode (runs in background)
@@ -180,38 +184,60 @@ module Telecr
         self
       end
       
+      # Start bot in webhook mode
+#
+# @param path [String] URL path for webhook (e.g., "/webhook")
+# @param port [Int32?] Port to listen on (default: 3000)
+# @param host [String] Host to bind to (default: "0.0.0.0")
+# @param ssl [Bool | Hash(Symbol, String)?] SSL configuration
+# @param secret_token [String?] Custom secret token (auto-generated if nil)
+# @param logger [Logger?] Custom logger
+# @return [Webhook::Server] The webhook server instance
+            def start_webhook(
+path : String = "/webhook",
+port : Int32? = nil,
+host : String = "0.0.0.0",
+ssl : (Bool | Hash(Symbol, String))? = nil,
+secret_token : String? = nil,
+logger : Logger? = nil
+)
+# Create webhook server
+@webhook_server = Webhook::Server.new(
+self,
+port: port,
+host: host,
+secret_token: secret_token,
+logger: logger,
+ssl: ssl
+)
+
+
+# Store the path
+@webhook_path = path
+
+# Start the server
+@webhook_server.run
+
+# Set webhook with Telegram
+@webhook_server.set_webhook
+
+@webhook_server
+end
+
+# Stop webhook server
+def stop_webhook
+if @webhook_server
+@webhook_server.stop
+@webhook_server = nil
+end
+end
+      
       # Set custom error handler
       def error(&block)
         @error_handler = block
       end
       
-      # Set webhook with optional callback
-      def set_webhook(url, **options, &callback)
-        if callback
-          @client.call!('setWebhook', { url: url }.merge(options), &callback)
-        else
-          @client.call('setWebhook', { url: url }.merge(options))
-        end
-      end
 
-      # Delete webhook with optional callback
-      def delete_webhook(&callback)
-        if callback
-          @client.call!('deleteWebhook', {}, &callback)
-        else
-          @client.call('deleteWebhook', {})
-        end
-      end
-
-      # Get webhook info with optional callback
-      def get_webhook_info(&callback)
-        if callback
-          @client.call!('getWebhookInfo', {}, &callback)
-        else
-          @client.call('getWebhookInfo', {})
-        end
-      end
-      
       # Process raw update data (useful for webhooks)
       def process(update_data)
         update = Types::Update.new(update_data)
