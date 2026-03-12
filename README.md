@@ -3,6 +3,10 @@
 
 Telegram bot framework for Crystal. Inspired by telegem (Ruby).
 
+[![CI](https://github.com/telegem-cr/telecr/actions/workflows/ci.yml/badge.svg)](https://github.com/telegem-cr/telecr/actions/workflows/ci.yml)
+[![Docs](https://github.com/telegem-cr/telecr/actions/workflows/ci.yml/badge.svg?job=docs)](https://telegem-cr.github.io/telecr)
+[![Release](https://img.shields.io/github/v/release/telegem-cr/telecr)](https://github.com/telegem-cr/telecr/releases)
+
 ## Installation
 
 Add to your `shard.yml`:
