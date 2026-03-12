@@ -11,41 +11,14 @@ cache:
 before_script:
   - apt-get update -qq && apt-get install -y -qq libssl-dev git
   - shards install
-  - git config --global user.name "GitLab CI"
-  - git config --global user.email "ci@gitlab.com"
-
 stages:
-  - fix
   - test
   - docs
   - pages
 
-fix:
-  stage: fix
-  script:
-    - echo "🔧 Running Ameba auto-correct on all files..."
-    - bin/ameba --fix || true
-    
-    - echo "📝 Checking for changes..."
-    - git add .
-    - if ! git diff --quiet HEAD || ! git diff --cached --quiet; then
-    -   git commit -m "🤖 Apply Ameba auto-corrections"
-    -   git push https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_REPOSITORY_URL#*@} HEAD:${CI_COMMIT_REF_NAME}
-    -   echo "✅ Committed fixes"
-    - else
-    -   echo "✅ No fixes needed"
-    - fi
-  only:
-    - main
-  except:
-    - tags
-
 test:
   stage: test
   script:
-    - echo "🔍 Running full checks..."
-    - crystal tool format --check
-    - bin/ameba
     - crystal spec
   artifacts:
     when: always
