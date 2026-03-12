@@ -7,11 +7,13 @@ module Telecr
     # It's passed through middleware chain and finally to the user's handler
     class Context
       # Core properties
-      property update : Types::Update?     # The raw update from Telegram
+      property update : Types::Update      # The raw update from Telegram
       property bot : Bot                    # The bot instance handling this update
       property state : Hash(Symbol, JSON::Any)  # Shared state between middlewares
       property match : Regex::MatchData?    # Match data from pattern matching (command/hears)
       property session : Hash(String, JSON::Any)  # Session data for this user
+      property typing_active : Bool = false  # Track if typing indicator is active
+      
       # Initialize with update and bot
       def initialize(@update : Types::Update, @bot : Bot)
         @state = {} of Symbol => JSON::Any
@@ -133,7 +135,7 @@ module Telecr
       
       # Get the type of this update as a symbol
       def update_type : Symbol
-        @update.type 
+        @update.update_type
       end 
 
       # Check if this is an edited message
@@ -173,7 +175,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id, text: text }.merge(options)
-        @bot.client.call('sendMessage', params)
+        @bot.client.call("sendMessage", params)
       end
       
       # Edit the current message text
@@ -186,7 +188,7 @@ module Telecr
           text: text
         }.merge(options)
         
-        @bot.client.call('editMessageText', params)
+        @bot.client.call("editMessageText", params)
       end
       
       # Delete a message
@@ -194,7 +196,7 @@ module Telecr
         mid = message_id || message&.message_id
         return nil unless mid && chat
         
-        @bot.client.call('deleteMessage', {chat_id: chat.id, message_id: mid})
+        @bot.client.call("deleteMessage", {chat_id: chat.id, message_id: mid})
       end
       
       # Answer a callback query
@@ -207,7 +209,7 @@ module Telecr
         }.merge(options)
         
         params[:text] = text if text
-        @bot.client.call('answerCallbackQuery', params)
+        @bot.client.call("answerCallbackQuery", params)
       end
       
       # Answer an inline query with results
@@ -219,7 +221,7 @@ module Telecr
           results: results.to_json
         }.merge(options)
         
-        @bot.client.call('answerInlineQuery', params)
+        @bot.client.call("answerInlineQuery", params)
       end
       
       # ===== Media Sending Methods =====
@@ -231,9 +233,9 @@ module Telecr
         params = { chat_id: chat.id, caption: caption }.merge(options)
         
         if file_object?(photo)
-          @bot.client.upload('sendPhoto', params.merge(photo: photo))
+          @bot.client.upload("sendPhoto", params.merge(photo: photo))
         else
-          @bot.client.call('sendPhoto', params.merge(photo: photo))
+          @bot.client.call("sendPhoto", params.merge(photo: photo))
         end
       end
       
@@ -244,9 +246,9 @@ module Telecr
         params = { chat_id: chat.id, caption: caption }.merge(options)
         
         if file_object?(document)
-          @bot.client.upload('sendDocument', params.merge(document: document))
+          @bot.client.upload("sendDocument", params.merge(document: document))
         else
-          @bot.client.call('sendDocument', params.merge(document: document))
+          @bot.client.call("sendDocument", params.merge(document: document))
         end
       end
       
@@ -257,9 +259,9 @@ module Telecr
         params = { chat_id: chat.id, caption: caption }.merge(options)
         
         if file_object?(audio)
-          @bot.client.upload('sendAudio', params.merge(audio: audio))
+          @bot.client.upload("sendAudio", params.merge(audio: audio))
         else
-          @bot.client.call('sendAudio', params.merge(audio: audio))
+          @bot.client.call("sendAudio", params.merge(audio: audio))
         end
       end
       
@@ -270,9 +272,9 @@ module Telecr
         params = { chat_id: chat.id, caption: caption }.merge(options)
         
         if file_object?(video)
-          @bot.client.upload('sendVideo', params.merge(video: video))
+          @bot.client.upload("sendVideo", params.merge(video: video))
         else
-          @bot.client.call('sendVideo', params.merge(video: video))
+          @bot.client.call("sendVideo", params.merge(video: video))
         end
       end
       
@@ -283,9 +285,9 @@ module Telecr
         params = { chat_id: chat.id, caption: caption }.merge(options)
         
         if file_object?(voice)
-          @bot.client.upload('sendVoice', params.merge(voice: voice))
+          @bot.client.upload("sendVoice", params.merge(voice: voice))
         else
-          @bot.client.call('sendVoice', params.merge(voice: voice))
+          @bot.client.call("sendVoice", params.merge(voice: voice))
         end
       end
       
@@ -299,7 +301,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id, sticker: sticker }.merge(options)
-        @bot.client.call('sendSticker', params)
+        @bot.client.call("sendSticker", params)
       end
       
       # Send a location
@@ -312,7 +314,7 @@ module Telecr
           longitude: longitude 
         }.merge(options)
         
-        @bot.client.call('sendLocation', params)
+        @bot.client.call("sendLocation", params)
       end
       
       # Send a chat action (typing, uploading, etc.)
@@ -320,7 +322,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id, action: action }.merge(options)
-        @bot.client.call('sendChatAction', params)
+        @bot.client.call("sendChatAction", params)
       end
       
       # Forward a message from another chat
@@ -333,7 +335,7 @@ module Telecr
           message_id: message_id 
         }.merge(options)
         
-        @bot.client.call('forwardMessage', params)
+        @bot.client.call("forwardMessage", params)
       end
       
       # Copy a message from another chat
@@ -346,7 +348,7 @@ module Telecr
           message_id: message_id 
         }.merge(options)
         
-        @bot.client.call('copyMessage', params)
+        @bot.client.call("copyMessage", params)
       end
       
       # ===== Chat Management =====
@@ -356,7 +358,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id, message_id: message_id }.merge(options)
-        @bot.client.call('pinChatMessage', params)
+        @bot.client.call("pinChatMessage", params)
       end
       
       # Unpin a message
@@ -364,7 +366,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id }.merge(options)
-        @bot.client.call('unpinChatMessage', params)
+        @bot.client.call("unpinChatMessage", params)
       end
       
       # Kick a member from the chat
@@ -372,7 +374,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id, user_id: user_id }.merge(options)
-        @bot.client.call('kickChatMember', params)
+        @bot.client.call("kickChatMember", params)
       end
       
       # Ban a member from the chat
@@ -380,7 +382,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id, user_id: user_id }.merge(options)
-        @bot.client.call('banChatMember', params)
+        @bot.client.call("banChatMember", params)
       end
       
       # Unban a member
@@ -388,7 +390,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id, user_id: user_id }.merge(options)
-        @bot.client.call('unbanChatMember', params)
+        @bot.client.call("unbanChatMember", params)
       end
       
       # Get chat administrators
@@ -396,7 +398,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id }.merge(options)
-        @bot.client.call('getChatAdministrators', params)
+        @bot.client.call("getChatAdministrators", params)
       end
       
       # Get members count
@@ -404,7 +406,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id }.merge(options)
-        @bot.client.call('getChatMembersCount', params)
+        @bot.client.call("getChatMembersCount", params)
       end
       
       # Get chat info
@@ -412,7 +414,7 @@ module Telecr
         return nil unless chat
         
         params = { chat_id: chat.id }.merge(options)
-        @bot.client.call('getChat', params)
+        @bot.client.call("getChat", params)
       end
       
       # ===== Keyboard Helpers =====
@@ -469,34 +471,34 @@ module Telecr
           reply_markup: reply_markup
         }.merge(options)
         
-        @bot.client.call('editMessageReplyMarkup', params)
+        @bot.client.call("editMessageReplyMarkup", params)
       end
       
       # ===== Chat Actions =====
       
       # Send typing action
       def typing(**options)
-        send_chat_action('typing', **options)
+        send_chat_action("typing", **options)
       end
       
       # Send uploading photo action
       def uploading_photo(**options)
-        send_chat_action('upload_photo', **options)
+        send_chat_action("upload_photo", **options)
       end
       
       # Send uploading video action
       def uploading_video(**options)
-        send_chat_action('upload_video', **options)
+        send_chat_action("upload_video", **options)
       end
       
       # Send uploading audio action
       def uploading_audio(**options)
-        send_chat_action('upload_audio', **options)
+        send_chat_action("upload_audio", **options)
       end
       
       # Send uploading document action
       def uploading_document(**options)
-        send_chat_action('upload_document', **options)
+        send_chat_action("upload_document", **options)
       end
       
       # Keep typing active during a long operation
@@ -537,7 +539,6 @@ module Telecr
       def user_id : Int64?
         from&.id
       end
-      
       
       # Check if object is a file (for uploads)
       private def file_object?(obj) : Bool
