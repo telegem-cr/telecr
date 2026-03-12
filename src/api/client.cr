@@ -3,7 +3,7 @@
 
 require "http/client"
 require "json"
-require "http/form_data"
+require "http/form-data"
 require "logger"
 
 module Telegem
