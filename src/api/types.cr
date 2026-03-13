@@ -36,7 +36,7 @@ module Telecr
       protected def wrap_array(key : String, klass : BaseType.class) : Nil
         if arr = @raw[key]?.try(&.as_a?)
           @raw[key] = arr.map do |item|
-            if item.is_a?(klass)
+            if item.is_a?(BaseType)
               item.to_h.as(JSON::Any)
             else
               klass.new(item.as_h).to_h.as(JSON::Any)
