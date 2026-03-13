@@ -1,5 +1,6 @@
 # context.cr - Context object passed through middleware and handlers
 # Contains all data about the current update and provides helper methods
+# Fully compatible with Telegram Bot API 9.5 (March 2026)
 
 module Telecr
   module Core 
@@ -22,7 +23,7 @@ module Telecr
         @typing_active = false
       end 
       
-      # ===== Update Type Accessors =====
+      # ===== Update Type Accessors (must be defined before use) =====
       
       # Get the message if this update is a message
       def message : Types::Message?
@@ -59,7 +60,7 @@ module Telecr
         inline_query&.query
       end 
       
-      # ===== Message Properties =====
+      # ===== Message Properties (API 9.5 updates) =====
       
       # Get message ID
       def message_id : Int64?
@@ -130,6 +131,11 @@ module Telecr
       def replied_chat : Types::Chat?
         replied_message&.chat 
       end 
+
+      # NEW in API 9.5: Get sender tag (for group members)
+      def sender_tag : String?
+        message&.sender_tag
+      end
       
       # ===== Update Type Detection =====
       
@@ -168,7 +174,7 @@ module Telecr
         message&.command_args if command?
       end
       
-      # ===== Response Methods =====
+      # ===== Response Methods (send actions) =====
       
       # Send a text message to the chat
       def reply(text : String, **options)
@@ -176,6 +182,14 @@ module Telecr
         
         params = { chat_id: chat.id, text: text }.merge(options)
         @bot.client.call("sendMessage", params)
+      end
+      
+      # NEW in API 9.5: Send a message draft (streaming)
+      def reply_draft(text : String, **options)
+        return nil unless chat
+        
+        params = { chat_id: chat.id, text: text }.merge(options)
+        @bot.client.call("sendMessageDraft", params)
       end
       
       # Edit the current message text
@@ -506,7 +520,7 @@ module Telecr
         @typing_active = true
         
         # Spawn a fiber to send typing every 5 seconds
-        typing_fiber = spawn do
+        spawn do
           while @typing_active
             typing
             sleep 5
