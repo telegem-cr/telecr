@@ -18,7 +18,7 @@ module Telecr
           text: content,
           icon_custom_emoji_id: icon_custom_emoji_id,
           style: style
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a button that requests user's phone number when clicked
@@ -33,7 +33,7 @@ module Telecr
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id,
           request_contact: true
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a button that requests user's location when clicked
@@ -48,7 +48,7 @@ module Telecr
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id,
           request_location: true
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a button that creates a poll when clicked
@@ -64,7 +64,7 @@ module Telecr
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id,
           request_poll: poll_type ? { type: poll_type } : {} of String => JSON::Any
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a button that opens a web app
@@ -80,7 +80,7 @@ module Telecr
           url: url,
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
     end
     

@@ -20,7 +20,7 @@ module Telecr
           callback_data: data,
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a button that opens a URL when pressed
@@ -36,7 +36,7 @@ module Telecr
           url: url,
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a button that switches to inline mode
@@ -52,7 +52,7 @@ module Telecr
           switch_inline_query: query,
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a button that switches to inline mode in current chat
@@ -68,7 +68,7 @@ module Telecr
           switch_inline_query_current_chat: query,
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a button that launches a game
@@ -84,7 +84,7 @@ module Telecr
           callback_game: { game_short_name: game_short_name },
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a payment button
@@ -99,7 +99,7 @@ module Telecr
           pay: true,
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a web app button
@@ -115,7 +115,7 @@ module Telecr
           web_app: { url: url },
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
       
       # Create a login button
@@ -133,7 +133,7 @@ module Telecr
           login_url: login_url,
           style: style,
           icon_custom_emoji_id: icon_custom_emoji_id
-        }.compact
+        }.reject { |_, v| v.nil? }
       end
     end
     
