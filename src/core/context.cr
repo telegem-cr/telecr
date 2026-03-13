@@ -23,7 +23,7 @@ module Telecr
         @typing_active = false
       end 
       
-      # ===== Update Type Accessors (must be defined before use) =====
+      # ===== Update Type Accessors =====
       
       # Get the message if this update is a message
       def message : Types::Message?
@@ -40,108 +40,101 @@ module Telecr
         @update.inline_query
       end 
       
-      # Get the user who sent this update
+      # Get the user who sent this update (with self. added)
       def from : Types::User?
-         if msg = self.message
-            msg.from
-         elsif cq = self.callback_query
-           cq.from
-         elsif iq = self.inline_query
-           iq.from
-         end 
-       end 
- 
+        self.message&.from || self.callback_query&.from || self.inline_query&.from 
+      end 
       
-      # Get the chat where this update occurred
+      # Get the chat where this update occurred (with self. added)
       def chat : Types::Chat?
-        message&.chat || callback_query&.message&.chat 
+        self.message&.chat || self.callback_query&.message&.chat 
       end 
       
-      # Get callback data (for callback queries)
+      # Get callback data (for callback queries) (with self. added)
       def data : String?
-        callback_query&.data
+        self.callback_query&.data
       end 
       
-      # Get inline query text
+      # Get inline query text (with self. added)
       def query : String?
-        inline_query&.query
+        self.inline_query&.query
       end 
       
-      # ===== Message Properties (API 9.5 updates) =====
+      # ===== Message Properties =====
       
-      # Get message ID
+      # Get message ID (with self. added)
       def message_id : Int64?
-        message&.message_id
+        self.message&.message_id
       end 
       
-      # Get message date
+      # Get message date (with self. added)
       def message_date : Time?
-        message&.date
+        self.message&.date
       end 
       
-      # Get edit date if message was edited
+      # Get edit date if message was edited (with self. added)
       def edit_date : Time?
-        message&.edit_date
+        self.message&.edit_date
       end 
       
-      # Get command name if this is a command
+      # Get command name if this is a command (with self. added)
       def command_name : String?
-        message&.command_name
+        self.message&.command_name
       end 
       
-      # Check if message has media
+      # Check if message has media (with self. added)
       def has_media? : Bool
-        message&.has_media? || false 
+        self.message&.has_media? || false 
       end 
       
-      # Get media type if present
+      # Get media type if present (with self. added)
       def media_type : Symbol?
-        message&.media_type
+        self.message&.media_type
       end 
       
-      # Get message entities
+      # Get message entities (with self. added)
       def entities : Array(Types::MessageEntity)
-        message&.entities || [] of Types::MessageEntity
+        self.message&.entities || [] of Types::MessageEntity
       end 
       
-      # Get caption entities
+      # Get caption entities (with self. added)
       def caption_entities : Array(Types::MessageEntity)
-        message&.caption_entities || [] of Types::MessageEntity
+        self.message&.caption_entities || [] of Types::MessageEntity
       end 
       
-      # Get message caption
+      # Get message caption (with self. added)
       def caption : String?
-        message&.caption 
+        self.message&.caption 
       end 
 
-      # Check if this is a reply to another message
+      # Check if this is a reply to another message (with self. added)
       def reply? : Bool
-        message&.reply? || false
+        self.message&.reply? || false
       end 
 
-      # Get the message being replied to
+      # Get the message being replied to (with self. added)
       def replied_message : Types::Message?
-        message&.reply_to_message 
+        self.message&.reply_to_message 
       end 
 
-      # Get text of replied message
+      # Get text of replied message (with self. added)
       def replied_text : String?
-        replied_message&.text
+        self.replied_message&.text
       end 
 
-      # Get sender of replied message
+      # Get sender of replied message (with self. added)
       def replied_from : Types::User?
-        replied_message&.from 
+        self.replied_message&.from 
       end 
 
-      # Get chat of replied message
+      # Get chat of replied message (with self. added)
       def replied_chat : Types::Chat?
-        replied_message&.chat 
+        self.replied_message&.chat 
       end 
 
-      # NEW in API 9.5: Get sender tag (for group members)
+      # NEW in API 9.5: Get sender tag (for group members) (with self. added)
       def sender_tag : String?
-        message&.sender_tag
+        self.message&.sender_tag
       end
       
       # ===== Update Type Detection =====
@@ -158,54 +151,54 @@ module Telecr
 
       # Check if this is a channel post
       def channel_post? : Bool
-        update_type == :channel_post
+        self.update_type == :channel_post
       end 
 
       # Check if this is a callback query
       def callback_query? : Bool
-        update_type == :callback_query
+        self.update_type == :callback_query
       end 
 
       # Check if this is an inline query
       def inline_query? : Bool
-        update_type == :inline_query
+        self.update_type == :inline_query
       end 
       
-      # Check if this is a command message
+      # Check if this is a command message (with self. added)
       def command? : Bool
-        message&.command? || false
+        self.message&.command? || false
       end
       
-      # Get command arguments if this is a command
+      # Get command arguments if this is a command (with self. added)
       def command_args : String?
-        message&.command_args if command?
+        self.message&.command_args if self.command?
       end
       
-      # ===== Response Methods (send actions) =====
+      # ===== Response Methods =====
       
       # Send a text message to the chat
       def reply(text : String, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, text: text }.merge(options)
+        params = { chat_id: self.chat.id, text: text }.merge(options)
         @bot.client.call("sendMessage", params)
       end
       
       # NEW in API 9.5: Send a message draft (streaming)
       def reply_draft(text : String, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, text: text }.merge(options)
+        params = { chat_id: self.chat.id, text: text }.merge(options)
         @bot.client.call("sendMessageDraft", params)
       end
       
       # Edit the current message text
       def edit_message_text(text : String, **options)
-        return nil unless message && chat
+        return nil unless self.message && self.chat
         
         params = {
-          chat_id: chat.id,
-          message_id: message.message_id,
+          chat_id: self.chat.id,
+          message_id: self.message.message_id,
           text: text
         }.merge(options)
         
@@ -214,18 +207,18 @@ module Telecr
       
       # Delete a message
       def delete_message(message_id : Int64? = nil)
-        mid = message_id || message&.message_id
-        return nil unless mid && chat
+        mid = message_id || self.message&.message_id
+        return nil unless mid && self.chat
         
-        @bot.client.call("deleteMessage", {chat_id: chat.id, message_id: mid})
+        @bot.client.call("deleteMessage", {chat_id: self.chat.id, message_id: mid})
       end
       
       # Answer a callback query
       def answer_callback_query(text : String? = nil, show_alert : Bool = false, **options)
-        return nil unless callback_query
+        return nil unless self.callback_query
         
         params = {
-          callback_query_id: callback_query.id,
+          callback_query_id: self.callback_query.id,
           show_alert: show_alert
         }.merge(options)
         
@@ -235,10 +228,10 @@ module Telecr
       
       # Answer an inline query with results
       def answer_inline_query(results : Array, **options)
-        return nil unless inline_query
+        return nil unless self.inline_query
         
         params = {
-          inline_query_id: inline_query.id,
+          inline_query_id: self.inline_query.id,
           results: results.to_json
         }.merge(options)
         
@@ -249,9 +242,9 @@ module Telecr
       
       # Send a photo
       def photo(photo, caption : String? = nil, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, caption: caption }.merge(options)
+        params = { chat_id: self.chat.id, caption: caption }.merge(options)
         
         if file_object?(photo)
           @bot.client.upload("sendPhoto", params.merge(photo: photo))
@@ -262,9 +255,9 @@ module Telecr
       
       # Send a document
       def document(document, caption : String? = nil, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, caption: caption }.merge(options)
+        params = { chat_id: self.chat.id, caption: caption }.merge(options)
         
         if file_object?(document)
           @bot.client.upload("sendDocument", params.merge(document: document))
@@ -275,9 +268,9 @@ module Telecr
       
       # Send an audio file
       def audio(audio, caption : String? = nil, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, caption: caption }.merge(options)
+        params = { chat_id: self.chat.id, caption: caption }.merge(options)
         
         if file_object?(audio)
           @bot.client.upload("sendAudio", params.merge(audio: audio))
@@ -288,9 +281,9 @@ module Telecr
       
       # Send a video
       def video(video, caption : String? = nil, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, caption: caption }.merge(options)
+        params = { chat_id: self.chat.id, caption: caption }.merge(options)
         
         if file_object?(video)
           @bot.client.upload("sendVideo", params.merge(video: video))
@@ -301,9 +294,9 @@ module Telecr
       
       # Send a voice message
       def voice(voice, caption : String? = nil, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, caption: caption }.merge(options)
+        params = { chat_id: self.chat.id, caption: caption }.merge(options)
         
         if file_object?(voice)
           @bot.client.upload("sendVoice", params.merge(voice: voice))
@@ -319,18 +312,18 @@ module Telecr
       
       # Send a sticker
       def sticker(sticker, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, sticker: sticker }.merge(options)
+        params = { chat_id: self.chat.id, sticker: sticker }.merge(options)
         @bot.client.call("sendSticker", params)
       end
       
       # Send a location
       def location(latitude : Float64, longitude : Float64, **options)
-        return nil unless chat
+        return nil unless self.chat
         
         params = { 
-          chat_id: chat.id, 
+          chat_id: self.chat.id, 
           latitude: latitude, 
           longitude: longitude 
         }.merge(options)
@@ -340,18 +333,18 @@ module Telecr
       
       # Send a chat action (typing, uploading, etc.)
       def send_chat_action(action : String, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, action: action }.merge(options)
+        params = { chat_id: self.chat.id, action: action }.merge(options)
         @bot.client.call("sendChatAction", params)
       end
       
       # Forward a message from another chat
       def forward_message(from_chat_id : Int64, message_id : Int64, **options)
-        return nil unless chat
+        return nil unless self.chat
         
         params = { 
-          chat_id: chat.id, 
+          chat_id: self.chat.id, 
           from_chat_id: from_chat_id, 
           message_id: message_id 
         }.merge(options)
@@ -361,10 +354,10 @@ module Telecr
       
       # Copy a message from another chat
       def copy_message(from_chat_id : Int64, message_id : Int64, **options)
-        return nil unless chat
+        return nil unless self.chat
         
         params = { 
-          chat_id: chat.id, 
+          chat_id: self.chat.id, 
           from_chat_id: from_chat_id, 
           message_id: message_id 
         }.merge(options)
@@ -376,65 +369,65 @@ module Telecr
       
       # Pin a message in the chat
       def pin_message(message_id : Int64, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, message_id: message_id }.merge(options)
+        params = { chat_id: self.chat.id, message_id: message_id }.merge(options)
         @bot.client.call("pinChatMessage", params)
       end
       
       # Unpin a message
       def unpin_message(**options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id }.merge(options)
+        params = { chat_id: self.chat.id }.merge(options)
         @bot.client.call("unpinChatMessage", params)
       end
       
       # Kick a member from the chat
       def kick_chat_member(user_id : Int64, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, user_id: user_id }.merge(options)
+        params = { chat_id: self.chat.id, user_id: user_id }.merge(options)
         @bot.client.call("kickChatMember", params)
       end
       
       # Ban a member from the chat
       def ban_chat_member(user_id : Int64, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, user_id: user_id }.merge(options)
+        params = { chat_id: self.chat.id, user_id: user_id }.merge(options)
         @bot.client.call("banChatMember", params)
       end
       
       # Unban a member
       def unban_chat_member(user_id : Int64, **options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id, user_id: user_id }.merge(options)
+        params = { chat_id: self.chat.id, user_id: user_id }.merge(options)
         @bot.client.call("unbanChatMember", params)
       end
       
       # Get chat administrators
       def get_chat_administrators(**options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id }.merge(options)
+        params = { chat_id: self.chat.id }.merge(options)
         @bot.client.call("getChatAdministrators", params)
       end
       
       # Get members count
       def get_chat_members_count(**options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id }.merge(options)
+        params = { chat_id: self.chat.id }.merge(options)
         @bot.client.call("getChatMembersCount", params)
       end
       
       # Get chat info
       def get_chat(**options)
-        return nil unless chat
+        return nil unless self.chat
         
-        params = { chat_id: chat.id }.merge(options)
+        params = { chat_id: self.chat.id }.merge(options)
         @bot.client.call("getChat", params)
       end
       
@@ -455,28 +448,28 @@ module Telecr
       
       # Reply with a keyboard
       def reply_with_keyboard(text : String, keyboard_markup, **options)
-        return nil unless chat
+        return nil unless self.chat
         
         reply_markup = keyboard_markup.is_a?(Hash) ? keyboard_markup : keyboard_markup.to_h
-        reply(text, reply_markup: reply_markup, **options)
+        self.reply(text, reply_markup: reply_markup, **options)
       end
       
       # Reply with inline keyboard
       def reply_with_inline_keyboard(text : String, inline_markup, **options)
-        return nil unless chat
+        return nil unless self.chat
         
         reply_markup = inline_markup.is_a?(Hash) ? inline_markup : inline_markup.to_h
-        reply(text, reply_markup: reply_markup, **options)
+        self.reply(text, reply_markup: reply_markup, **options)
       end
       
       # Remove keyboard
       def remove_keyboard(text : String? = nil, **options)
-        return nil unless chat
+        return nil unless self.chat
         
         # Placeholder for keyboard removal
         reply_markup = {remove_keyboard: true}
         if text
-          reply(text, reply_markup: reply_markup, **options)
+          self.reply(text, reply_markup: reply_markup, **options)
         else
           reply_markup
         end
@@ -484,11 +477,11 @@ module Telecr
       
       # Edit message reply markup
       def edit_message_reply_markup(reply_markup, **options)
-        return nil unless message && chat
+        return nil unless self.message && self.chat
         
         params = {
-          chat_id: chat.id,
-          message_id: message.message_id,
+          chat_id: self.chat.id,
+          message_id: self.message.message_id,
           reply_markup: reply_markup
         }.merge(options)
         
@@ -499,27 +492,27 @@ module Telecr
       
       # Send typing action
       def typing(**options)
-        send_chat_action("typing", **options)
+        self.send_chat_action("typing", **options)
       end
       
       # Send uploading photo action
       def uploading_photo(**options)
-        send_chat_action("upload_photo", **options)
+        self.send_chat_action("upload_photo", **options)
       end
       
       # Send uploading video action
       def uploading_video(**options)
-        send_chat_action("upload_video", **options)
+        self.send_chat_action("upload_video", **options)
       end
       
       # Send uploading audio action
       def uploading_audio(**options)
-        send_chat_action("upload_audio", **options)
+        self.send_chat_action("upload_audio", **options)
       end
       
       # Send uploading document action
       def uploading_document(**options)
-        send_chat_action("upload_document", **options)
+        self.send_chat_action("upload_document", **options)
       end
       
       # Keep typing active during a long operation
@@ -529,7 +522,7 @@ module Telecr
         # Spawn a fiber to send typing every 5 seconds
         spawn do
           while @typing_active
-            typing
+            self.typing
             sleep 5
           end
         end
@@ -556,9 +549,9 @@ module Telecr
         @bot.client
       end
       
-      # Get user ID
+      # Get user ID (with self. added)
       def user_id : Int64?
-        from&.id
+        self.from&.id
       end
       
       # Check if object is a file (for uploads)
