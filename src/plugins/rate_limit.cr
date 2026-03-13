@@ -40,7 +40,7 @@ module Telecr
         
         # Check if limits exceeded
         if limit_exceeded?(ctx)
-          ctx.logger.warn("Rate limit exceeded for #{ctx.from&.id}") if ctx.logger
+          @logger.error("rate limited") if ctx.logger
           return rate_limit_response(ctx)
         end
         
