@@ -1,6 +1,7 @@
 # client.cr - Telegram Bot API Client for Crystal
 # Handles all communication with Telegram servers
 
+require "http"
 require "http/client"
 require "json"
 require "http/form-data"
