@@ -289,7 +289,7 @@ module Telecr
       
       # Convert glob pattern to regex
       def pattern_to_regex(pattern)
-        regex_str = pattern.gsub("*", "".*").gsub("?", ".")
+        regex_str = pattern.gsub("*", ".*").gsub("?", ".")
         Regex.new("^#{regex_str}$")
       end
       
