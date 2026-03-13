@@ -4,7 +4,6 @@
 require "http"
 require "http/client"
 require "json"
-require "http/form-data"
 require "logger"
 
 module Telegem
