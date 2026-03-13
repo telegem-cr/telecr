@@ -42,8 +42,15 @@ module Telecr
       
       # Get the user who sent this update
       def from : Types::User?
-        message&.from || callback_query&.from || inline_query&.from 
-      end 
+         if msg = self.message
+            msg.from
+         elsif cq = self.callback_query
+           cq.from
+         elsif iq = self.inline_query
+           iq.from
+         end 
+       end 
+ 
       
       # Get the chat where this update occurred
       def chat : Types::Chat?
