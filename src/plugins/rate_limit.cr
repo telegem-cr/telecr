@@ -71,13 +71,13 @@ module Telecr
       
       # Check per-user limit
       private def user_limit?(ctx : Core::Context) : Bool
-        return false unless user_id = ctx.from&.id
+        return false unless user_id = ctx.from.id
         check_limit(:user, "user:#{user_id}", ctx)
       end
       
       # Check per-chat limit
       private def chat_limit?(ctx : Core::Context) : Bool
-        return false unless chat_id = ctx.chat&.id
+        return false unless chat_id = ctx.chat.id
         check_limit(:chat, "chat:#{chat_id}", ctx)
       end
       
@@ -106,7 +106,7 @@ module Telecr
         end
         
         # Chat counter
-        if (chat_config = @options[:chat]?) && (chat_id = ctx.chat&.id)
+        if (chat_config = @options[:chat]?) && (chat_id = ctx.chat.id)
           @counters[:chat].increment("chat:#{chat_id}", 1, ttl: chat_config[:per])
         end
       end
