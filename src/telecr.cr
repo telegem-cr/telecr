@@ -1,7 +1,16 @@
 # telecr.cr - Main entry point for Telecr
 # Require this file to use the library
 
-require "./**"
+# telecr.cr - Explicit load order
+require "./api/client"
+require "./api/*"
+require "./core/*"
+require "./markup/*"
+require "./plugins/*"
+require "./session/*"
+require "./webhook/*"
+require "log"
+require "json"
 
 module Telecr
   # Library version
