@@ -1,7 +1,7 @@
 #!/usr/bin/env crystal
 # bin/telecr-ssl.cr - SSL certificate helper for Telecr webhooks
 
-require "fileutils"
+require "file_utils"
 require "yaml"
 
 puts " Telecr SSL Setup"
