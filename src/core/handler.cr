@@ -62,7 +62,7 @@ module Telecr
         io << "#<Handler filters=#{@filters.keys} calls=#{@call_count}>"
       end
       
-      private
+      
       
       def matches_text?(ctx, pattern : FilterValue) : Bool
         return false unless text = ctx.message.try(&.text)
