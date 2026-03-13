@@ -64,12 +64,12 @@ module Telecr
       # @param ctx [Core::Context] Current context
       # @return [Bool] True if has files
       def has_file?(ctx : Core::Context) : Bool
-        return true if ctx.message&.photo
-        return true if ctx.message&.document
-        return true if ctx.message&.video
-        return true if ctx.message&.audio
-        return true if ctx.message&.voice
-        return true if ctx.message&.sticker
+        return true if ctx.message.photo
+        return true if ctx.message.document
+        return true if ctx.message.video
+        return true if ctx.message.audio
+        return true if ctx.message.voice
+        return true if ctx.message.sticker
         false
       end
       
