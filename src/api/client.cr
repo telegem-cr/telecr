@@ -25,7 +25,7 @@ module Telecr
         
         # Create HTTPS client for api.telegram.org
         @http = HTTP::Client.new("api.telegram.org", tls: true)
-        @http.read_timeout = @timeout
+        @http.read_timeout = @timeout.seconds
       end 
       
       # Make a blocking API call (raises on error)

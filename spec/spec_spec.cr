@@ -28,7 +28,7 @@ describe Telecr do
 
       keyboard.should be_a(Telecr::Markup::ReplyKeyboard)
       hash = keyboard.to_h
-      hash["keyboard"].should be_a(Array(JSON::Any))
+      hash["keyboard"].as_a.should be_a(Array(JSON::Any))
       hash["keyboard"].as_a.size.should eq(2)
     end
 
@@ -45,7 +45,7 @@ describe Telecr do
 
       keyboard.should be_a(Telecr::Markup::InlineKeyboard)
       hash = keyboard.to_h
-      hash["inline_keyboard"].should be_a(Array(JSON::Any))
+      hash["inline_keyboard"].as_a.should be_a(Array(JSON::Any))
       hash["inline_keyboard"].as_a.size.should eq(2)
     end
 
