@@ -43,8 +43,9 @@ build:
       - telecr
       - telecr-ssl
     expire_in: 1 week
+  when: manual
   only:
-    - manual
+    - main
 
 docs:
   stage: docs
