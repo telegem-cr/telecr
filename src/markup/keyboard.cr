@@ -92,7 +92,7 @@ module Telecr
           "resize_keyboard" => true,
           "one_time_keyboard" => false,
           "selective" => false
-        } of String => Bool
+        } of String => (Bool | String)
       end
       
       # Add a row of buttons
