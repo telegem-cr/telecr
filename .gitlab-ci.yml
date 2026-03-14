@@ -45,6 +45,7 @@ build:
     expire_in: 1 week
   only:
     - tags
+    - manual
 
 docs:
   stage: docs
